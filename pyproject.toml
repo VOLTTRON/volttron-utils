@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "volttron-utils"
+version = "0.1.0"
+description = ""
+authors = ["C. Allwardt <craig.allwardt@pnnl.gov>"]
+license = "Apache 2"
+packages = [
+    { include = "volttron" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+gevent = "20.6.1"
+greenlet = "0.4.16"
+watchdog-gevent = "^0.1.1"
+zmq = "^0.0.0"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
