@@ -62,6 +62,25 @@ from .. utils import create_file_if_missing
 _log = logging.getLogger(__name__)
 
 
+
+def get_random_key(length: int = 65) -> str:
+    """
+    Returns a hex random key of specified length.  The length must be > 0 in order for
+    the key to be valid.  Raises a ValueError if the length is invalid.
+
+    The default length is 65, which is 130 in length when hexlify is run.
+
+    :param length:
+    :return:
+    """
+    if length <= 0:
+        raise ValueError("Invalid length specified for random key must be > 0")
+
+    import binascii
+    random_key = binascii.hexlify(os.urandom(length)).decode('utf-8')
+    return random_key
+
+
 def encode_key(key):
     '''Base64-encode and return a key in a URL-safe manner.'''
     # There is no easy way to test if key is already base64 encoded and ASCII decoded. This seems the best way.
