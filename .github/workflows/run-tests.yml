@@ -21,7 +21,8 @@ jobs:
           poetry-version: ${{ matrix.poetry-version }}
       - name: Install Version
         run: |
-          poetry install
+          poetry install --no-dev
+          poetry run pip install flake8 pytest black
           # stop the build if there are Python syntax errors or undefined names
           poetry run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
