@@ -39,11 +39,15 @@
 __all__ = ['format_timestamp', 'parse_timestamp_string', 'get_aware_utc_now', 'get_utc_seconds_from_epoch',
            'process_timestamp']
 
+import calendar
 import datetime
 from dateutil.parser import parse
 from dateutil.tz import tzutc, tzoffset
+import logging
+import pytz
 from tzlocal import get_localzone
 
+_log = logging.getLogger(__name__)
 
 def format_timestamp(time_stamp):
     """Create a consistent datetime string representation based on

@@ -46,7 +46,7 @@ import base64
 
 from zmq.utils import z85
 
-from . import jsonapi
+from . import jsonapi, get_home
 import logging
 import os
 
