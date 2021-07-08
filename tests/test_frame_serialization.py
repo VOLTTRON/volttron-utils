@@ -4,7 +4,7 @@ from volttron.utils.frame_serialization import deserialize_frames, serialize_fra
 
 def test_can_deserialize_homogeneous_string():
     abc = ["alpha", "beta", "gamma"]
-    frames = [Frame(x.encode('utf-8')) for x in abc]
+    frames = [Frame(x.encode("utf-8")) for x in abc]
 
     deserialized = deserialize_frames(frames)
 
@@ -17,13 +17,18 @@ def test_can_serialize_homogeneous_strings():
     frames = serialize_frames(original)
 
     for r in range(len(original)):
-        assert original[r] == frames[r].bytes.decode('utf-8'), f"Element {r} is not the same."
+        assert original[r] == frames[r].bytes.decode(
+            "utf-8"
+        ), f"Element {r} is not the same."
 
 
 def test_mixed_array():
-    original = ["alpha", dict(alpha=5, gamma="5.0", theta=5.0), "gamma", ["from", "to", 'VIP1',
-                                                                          ['third', 'level',
-                                                                           'here', 50]]]
+    original = [
+        "alpha",
+        dict(alpha=5, gamma="5.0", theta=5.0),
+        "gamma",
+        ["from", "to", "VIP1", ["third", "level", "here", 50]],
+    ]
     frames = serialize_frames(original)
     for x in frames:
         assert isinstance(x, Frame)
