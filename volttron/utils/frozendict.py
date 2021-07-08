@@ -43,6 +43,7 @@ class FrozenDict(dict):
     we can no longer set values on the object itself.  This does that we can't
     change the value instance object if its mutable.
     """
+
     def __init__(self, *args, **kwargs):
         self._frozen = False
         dict.__init__(self, *args, **kwargs)
@@ -51,7 +52,7 @@ class FrozenDict(dict):
         self._frozen = True
 
     def __setitem__(self, key, value):
-        if (self._frozen):
+        if self._frozen:
             raise TypeError("Attempted assignment to a frozen dict")
         else:
             return dict.__setitem__(self, key, value)
