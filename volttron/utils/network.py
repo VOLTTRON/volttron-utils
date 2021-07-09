@@ -38,6 +38,7 @@
 
 import logging
 import os
+import sys
 import re
 import traceback
 
@@ -73,7 +74,8 @@ def get_hostname():
     with open("/etc/hostname") as fp:
         hostname = fp.read().strip()
 
-    assert hostname
+    if not hostname:
+        raise ValueError("/etc/hostname file not found!")
     return hostname
 
 
