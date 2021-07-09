@@ -36,6 +36,7 @@
 # under Contract DE-AC05-76RL01830
 # }}}
 
+__all__ = ['create_file_if_missing']
 
 import os
 import errno
@@ -43,27 +44,6 @@ import logging
 
 
 _log = logging.getLogger(__name__)
-
-
-def get_home():
-    """ Return the home directory with user and variables expanded.
-
-    If the VOLTTRON_HOME environment variable is set, it used.
-    Otherwise, the default value of '~/.volttron' is used.
-    """
-
-    vhome = os.path.abspath(
-        os.path.normpath(
-            os.path.expanduser(
-                os.path.expandvars(
-                    os.environ.get('VOLTTRON_HOME', '~/.volttron')))))
-    if vhome.endswith('/'):
-        vhome = vhome[:-1]
-        if os.environ.get('VOLTTRON_HOME') is not None:
-            _log = logging.getLogger('volttron')
-            _log.warning("Removing / from the end of VOLTTRON_HOME")
-            os.environ['VOLTTRON_HOME'] = vhome
-    return vhome
 
 
 def create_file_if_missing(path, permission=0o660, contents=None):
