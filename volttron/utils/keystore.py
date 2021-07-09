@@ -43,24 +43,34 @@
 
 """Module for storing local public and secret keys and remote public keys"""
 import base64
-
-from zmq.utils import z85
-
-from . import jsonapi, get_home
 import logging
 import os
+import urllib
 
+from zmq.utils import z85
 from zmq import curve_keypair
 
-#from .agent.utils import create_file_if_missing
-#from .vip.socket import encode_key
-# TODO agent.utils isn't available from here.
-from .. utils import create_file_if_missing
-#from volttron.platform.vip.socket import encode_key
-#from volttron.platform import get_home
+from . import jsonapi, ClientContext as cc
+from . file_access import create_file_if_missing
+
 
 _log = logging.getLogger(__name__)
 
+
+def get_server_keys():
+    try:
+        # attempt to read server's keys. Should be used only by multiplatform connection and tests
+        # If agents such as forwarder attempt this in secure mode this will throw access violation exception
+        ks = KeyStore()
+    except IOError as e:
+        raise RuntimeError(
+            "Exception accessing server keystore. Agents must use agent's public and private key"
+            "to build dynamic agents when running in secure mode. Exception:{}".format(
+                e
+            )
+        )
+
+    return ks.public, ks.secret
 
 
 def get_random_key(length: int = 65) -> str:
@@ -161,13 +171,13 @@ class KeyStore(BaseJSONStore):
 
     @staticmethod
     def get_default_path():
-        return os.path.join(get_home(), 'keystore')
+        return os.path.join(cc.get_volttron_home(), 'keystore')
 
     @staticmethod
     def get_agent_keystore_path(identity=None):
         if identity is None:
             raise AttributeError("invalid identity")
-        return os.path.join(get_home(), f"keystores/{identity}/keystore.json")
+        return os.path.join(cc.get_volttron_home(), f"keystores/{identity}/keystore.json")
 
     @staticmethod
     def generate_keypair_dict():
@@ -230,4 +240,25 @@ class KeyStore(BaseJSONStore):
         return self.public and self.secret
 
 
+class KnownHostsStore(BaseJSONStore):
+    """Handle storage and retrival of known hosts"""
 
+    def __init__(self, filename=None):
+        if filename is None:
+            filename = f"{cc.get_volttron_home()}/known_hosts"
+        # all agents need read access to known_hosts file
+        super(KnownHostsStore, self).__init__(filename, permissions=0o644)
+
+
+    def add(self, addr, server_key):
+        self.update({self._parse_addr(addr): server_key})
+
+    def serverkey(self, addr):
+        return self.load().get(self._parse_addr(addr), None)
+
+    @staticmethod
+    def _parse_addr(addr):
+        url = urllib.parse.urlparse(addr)
+        if url.netloc:
+            return url.netloc
+        return url.path

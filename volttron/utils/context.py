@@ -121,6 +121,10 @@ class ClientContext:
         """Get type of message bus - zeromq or rabbbitmq."""
         return klass.get_config_param('message-bus')
 
+    @classmethod
+    def get_instance_name(klass):
+        """Get type of message bus - zeromq or rabbbitmq."""
+        return klass.get_config_param('instance-name')
 
     @classmethod
     def is_web_enabled(klass):

@@ -40,7 +40,8 @@ __all__ = ['format_timestamp', 'parse_timestamp_string', 'get_aware_utc_now', 'g
            'process_timestamp']
 
 import calendar
-import datetime
+#import datetime
+from datetime import datetime
 from dateutil.parser import parse
 from dateutil.tz import tzutc, tzoffset
 import logging
