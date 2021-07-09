@@ -46,8 +46,15 @@ from contextlib import contextmanager
 
 from volttron.utils import jsonapi
 
-__all__ = ['Error', 'MethodNotFound', 'RemoteError', 'Dispatcher',
-           'json_result', 'json_validate_request', 'json_validate_response']
+__all__ = [
+    "Error",
+    "MethodNotFound",
+    "RemoteError",
+    "Dispatcher",
+    "json_result",
+    "json_validate_request",
+    "json_validate_response",
+]
 
 
 PARSE_ERROR = -32700
@@ -67,46 +74,46 @@ UNAVAILABLE_AGENT = -32006
 
 
 def json_validate_request(jsonrequest):
-    assert jsonrequest.get('id', None)
-    assert jsonrequest.get('jsonrpc', None) == '2.0'
-    assert jsonrequest.get('method', None)
+    assert jsonrequest.get("id", None)
+    assert jsonrequest.get("jsonrpc", None) == "2.0"
+    assert jsonrequest.get("method", None)
 
 
 def json_validate_response(jsonresponse):
-    assert jsonresponse.get('id', None)
-    assert jsonresponse.get('jsonrpc', None) == '2.0'
-    result = jsonresponse.get('result', None)
+    assert jsonresponse.get("id", None)
+    assert jsonresponse.get("jsonrpc", None) == "2.0"
+    result = jsonresponse.get("result", None)
     # if result is null then there is no result so we check to see if we have
     # an error.  If error is also None then this is an invalid response.
     if result is None:
-        assert jsonresponse.get('error', None)
+        assert jsonresponse.get("error", None)
 
 
 def json_method(ident, method, args, kwargs):
     """Builds a JSON-RPC request object (dictionary)."""
-    request = {'jsonrpc': '2.0', 'method': str(method)}
+    request = {"jsonrpc": "2.0", "method": str(method)}
     if args and kwargs:
-        request['params'] = {'*args': args, '**kwargs': kwargs}
+        request["params"] = {"*args": args, "**kwargs": kwargs}
     elif args:
-        request['params'] = args
+        request["params"] = args
     elif kwargs:
-        request['params'] = kwargs
+        request["params"] = kwargs
     if ident is not None:
-        request['id'] = ident
+        request["id"] = ident
     return request
 
 
 def json_result(ident, result):
     """Builds a JSON-RPC response object (dictionary)."""
-    return {'jsonrpc': '2.0', 'id': ident, 'result': result}
+    return {"jsonrpc": "2.0", "id": ident, "result": result}
 
 
 def json_error(ident, code, message, **data):
     """Builds a JSON-RPC error object (dictionary)."""
-    error = {'code': code, 'message': message}
+    error = {"code": code, "message": message}
     if data:
-        error['data'] = data
-    return {'jsonrpc': '2.0', 'id': ident, 'error': error}
+        error["data"] = data
+    return {"jsonrpc": "2.0", "id": ident, "error": error}
 
 
 class ParseError(Exception):
@@ -114,8 +121,8 @@ class ParseError(Exception):
 
 
 class JsonRpcData(object):
-    """ A `JsonRpcData` reprepresents the data associated with an rpc request.
-    """
+    """A `JsonRpcData` reprepresents the data associated with an rpc request."""
+
     def __init__(self, id, version, method, params, authorization):
         self.id = id
         self.version = version
@@ -131,41 +138,43 @@ class JsonRpcData(object):
             data = jsonstr.copy()
         else:
             data = jsonapi.loads(jsonstr)
-        id = data.get('id', None)
-        version = data.get('jsonrpc', None)
-        method = data.get('method', None)
-        params = data.get('params', None)
-        authorization = data.get('authorization', None)
+        id = data.get("id", None)
+        version = data.get("jsonrpc", None)
+        method = data.get("method", None)
+        params = data.get("params", None)
+        authorization = data.get("authorization", None)
 
         if id is None:
             raise ParseError("Invalid id")
-        if version != '2.0':
+        if version != "2.0":
             print("VERSION IS: {}".format(version))
-            raise ParseError('Invalid jsonrpc version')
+            raise ParseError("Invalid jsonrpc version")
         if method is None:
-            raise ParseError('Method not specified.')
+            raise ParseError("Method not specified.")
 
         return JsonRpcData(id, version, method, params, authorization)
 
 
 class Error(Exception):
     """Raised when a recoverable JSON-RPC protocol error occurs."""
+
     def __init__(self, code, message, data=None):
         args = (code, message, data) if data is not None else (code, message)
-        super(Error, self).__init__(*args)   # pylint: disable=star-args
+        super(Error, self).__init__(*args)  # pylint: disable=star-args
         self.code = code
         self.message = message
         self.data = data
 
     def __str__(self):
         try:
-            return str(self.data['detail'])
+            return str(self.data["detail"])
         except (AttributeError, KeyError, TypeError):
             return str(self.message)
 
 
 class MethodNotFound(Error):
     """Raised when remote method is not implemented."""
+
     pass
 
 
@@ -185,45 +194,42 @@ class RemoteError(Exception):
     def __init__(self, message, **exc_info):
         if exc_info:
             try:
-                exc_type = exc_info['exc_type']
-                exc_args = exc_info['exc_args']
+                exc_type = exc_info["exc_type"]
+                exc_args = exc_info["exc_args"]
             except KeyError:
                 msg = message
             else:
-                args = ', '.join(repr(arg) for arg in exc_args)
-                msg = '%s(%s)' % (exc_type, args)
+                args = ", ".join(repr(arg) for arg in exc_args)
+                msg = "%s(%s)" % (exc_type, args)
         super(RemoteError, self).__init__(msg)
         self.message = message
         self.exc_info = exc_info
 
     def __repr__(self):
-        exc_type = self.exc_info.get('exc_type', '<unknown>')
+        exc_type = self.exc_info.get("exc_type", "<unknown>")
         try:
-            exc_args = ', '.join(repr(arg) for arg in
-                                 self.exc_info['exc_args'])
+            exc_args = ", ".join(repr(arg) for arg in self.exc_info["exc_args"])
         except KeyError:
-            exc_args = '...'
-        return '%s(%s)' % (exc_type, exc_args)
+            exc_args = "..."
+        return "%s(%s)" % (exc_type, exc_args)
 
     def print_tb(self, file=sys.stderr):
         """Pretty print the traceback in the standard format."""
-        exc_type = self.exc_info.get('exc_type', '<unknown>')
-        file.write('Remote Traceback (most recent call last):\n')
+        exc_type = self.exc_info.get("exc_type", "<unknown>")
+        file.write("Remote Traceback (most recent call last):\n")
         try:
-            exc_tb = self.exc_info['exc_tb']
+            exc_tb = self.exc_info["exc_tb"]
         except KeyError:
-            file.write('  (traceback omitted)\n')
+            file.write("  (traceback omitted)\n")
         else:
-            file.write(''.join(exc_tb))
-        file.write('%s: %s\n' % (exc_type, self.message))
-
+            file.write("".join(exc_tb))
+        file.write("%s: %s\n" % (exc_type, self.message))
 
 
 def exception_from_json(code, message, data=None):
     """Return an exception suitable for raising in a caller."""
     if code == UNHANDLED_EXCEPTION:
-        return RemoteError(data.get('detail', message),
-                           **data.get('exception.py', {}))
+        return RemoteError(data.get("detail", message), **data.get("exception.py", {}))
     elif code == METHOD_NOT_FOUND:
         return MethodNotFound(code, message, data)
     return Error(code, message, data)
@@ -257,18 +263,20 @@ class Dispatcher(object):
         required by the call() method. The first (ident) element may be
         None to indicate a notification.
         """
-        return self.serialize([json_method(ident, method, args, kwargs)
-                               for ident, method, args, kwargs in requests])
+        return self.serialize(
+            [
+                json_method(ident, method, args, kwargs)
+                for ident, method, args, kwargs in requests
+            ]
+        )
 
     def call(self, ident, method, args=None, kwargs=None):
         """Create and return a request for a single method call."""
-        return self.serialize(json_method(
-            ident, method, args or (), kwargs or {}))
+        return self.serialize(json_method(ident, method, args or (), kwargs or {}))
 
     def notify(self, method, args=None, kwargs=None):
         """Create and return a request for a single notification."""
-        return self.serialize(json_method(
-            None, method, args or (), kwargs or {}))
+        return self.serialize(json_method(None, method, args or (), kwargs or {}))
 
     def exception(self, response, ident, message, context=None):
         """Called for response errors.
@@ -288,8 +296,7 @@ class Dispatcher(object):
         """Called when an error resposne is received."""
         pass
 
-    def method(self, request, ident, name, args, kwargs,
-               batch=None, context=None):
+    def method(self, request, ident, name, args, kwargs, batch=None, context=None):
         """Called to get make method call and return results.
 
         request is the original JSON request (as dict). name is the name
@@ -328,9 +335,12 @@ class Dispatcher(object):
             response = self._dispatch_one(message, None, context)
         else:
             response = json_error(
-                None, INVALID_REQUEST, 'invalid object type',
-                detail='expected a list or dictionary (object); '
-                       'got a {!r} instead'.format(type(message).__name__))
+                None,
+                INVALID_REQUEST,
+                "invalid object type",
+                detail="expected a list or dictionary (object); "
+                "got a {!r} instead".format(type(message).__name__),
+            )
         if response:
             try:
                 return self.serialize(response)
@@ -340,48 +350,69 @@ class Dispatcher(object):
     def _dispatch_one(self, msg, batch, context):
         """Dispatch a single JSON-RPC message."""
         try:
-            ident = msg.get('id')
+            ident = msg.get("id")
         except AttributeError:
-            return json_error(None, INVALID_REQUEST, 'invalid object type',
-                              detail='expected a dictionary (object); '
-                              'got a {!r} instead'.format(type(msg).__name__))
+            return json_error(
+                None,
+                INVALID_REQUEST,
+                "invalid object type",
+                detail="expected a dictionary (object); "
+                "got a {!r} instead".format(type(msg).__name__),
+            )
         try:
-            version = msg['jsonrpc']
+            version = msg["jsonrpc"]
         except KeyError:
-            return json_error(ident, INVALID_REQUEST, 'missing required member',
-                              detail="missing required 'jsonrpc' member")
-        if version != '2.0':
-            return json_error(ident, INVALID_REQUEST, 'unsupported version',
-                              detail='version 2.0 supported, '
-                              'but recieved version {!r}'.format(version))
-        if 'error' in msg:
-            error = msg['error']
+            return json_error(
+                ident,
+                INVALID_REQUEST,
+                "missing required member",
+                detail="missing required 'jsonrpc' member",
+            )
+        if version != "2.0":
+            return json_error(
+                ident,
+                INVALID_REQUEST,
+                "unsupported version",
+                detail="version 2.0 supported, "
+                "but recieved version {!r}".format(version),
+            )
+        if "error" in msg:
+            error = msg["error"]
             try:
-                code = error['code']
+                code = error["code"]
             except TypeError:
                 self.exception(
-                    msg, ident, "expected dict 'error' member; got "
-                    '{} instead'.format(type(error).__name__), context=context)
+                    msg,
+                    ident,
+                    "expected dict 'error' member; got "
+                    "{} instead".format(type(error).__name__),
+                    context=context,
+                )
                 return
             except KeyError:
                 self.exception(
-                    msg, ident, "'error' member is missing 'code' member",
-                    context=context)
+                    msg,
+                    ident,
+                    "'error' member is missing 'code' member",
+                    context=context,
+                )
                 return
             try:
-                message = error['message']
+                message = error["message"]
             except KeyError:
                 self.exception(
-                    msg, ident, "'error' member is missing 'message' member",
-                    context=context)
+                    msg,
+                    ident,
+                    "'error' member is missing 'message' member",
+                    context=context,
+                )
                 return
-            self.error(msg, ident, code, message, error.get('data'),
-                       context=context)
-        elif 'result' in msg:
-            self.result(msg, ident, msg['result'], context=context)
-        elif 'method' in msg:
-            name = str(msg['method'])
-            params = msg.get('params')
+            self.error(msg, ident, code, message, error.get("data"), context=context)
+        elif "result" in msg:
+            self.result(msg, ident, msg["result"], context=context)
+        elif "method" in msg:
+            name = str(msg["method"])
+            params = msg.get("params")
             if isinstance(params, list):
                 args, kwargs = params, {}
             elif isinstance(params, dict):
@@ -390,36 +421,48 @@ class Dispatcher(object):
                 args, kwargs = (), {}
             else:
                 return json_error(
-                    None, INVALID_PARAMS, 'invalid object type',
-                    detail='expected a list or dictionary (object); '
-                           'got a {!r} instead'.format(type(params).__name__))
+                    None,
+                    INVALID_PARAMS,
+                    "invalid object type",
+                    detail="expected a list or dictionary (object); "
+                    "got a {!r} instead".format(type(params).__name__),
+                )
             try:
-                result = self.method(msg, ident, name, args, kwargs,
-                                     batch=batch, context=context)
+                result = self.method(
+                    msg, ident, name, args, kwargs, batch=batch, context=context
+                )
             except NotImplementedError:
                 if ident is None:
                     return
                 return json_error(
-                    ident, METHOD_NOT_FOUND, 'unimplemented method',
-                    detail='method {!r} is not implemented'.format(name))
-            except Exception as exc:   # pylint: disable=broad-except
+                    ident,
+                    METHOD_NOT_FOUND,
+                    "unimplemented method",
+                    detail="method {!r} is not implemented".format(name),
+                )
+            except Exception as exc:  # pylint: disable=broad-except
                 if ident is None:
                     return
-                exc_info = getattr(exc, 'exc_info', {})
-                if 'exc_type' not in exc_info:
+                exc_info = getattr(exc, "exc_info", {})
+                if "exc_type" not in exc_info:
                     exc_type = type(exc)
-                    if exc_type.__module__ == 'exceptions':
-                        exc_info['exc_type'] = exc_type.__name__
+                    if exc_type.__module__ == "exceptions":
+                        exc_info["exc_type"] = exc_type.__name__
                     else:
-                        exc_info['exc_type'] = '.'.join(
-                            [exc_type.__module__, exc_type.__name__])
-                if 'exc_args' not in exc_info:
+                        exc_info["exc_type"] = ".".join(
+                            [exc_type.__module__, exc_type.__name__]
+                        )
+                if "exc_args" not in exc_info:
                     try:
-                        exc_info['exc_args'] = exc.args
+                        exc_info["exc_args"] = exc.args
                     except AttributeError:
                         pass
-                error = {'detail': str(exc), 'exception.py': exc_info}
-                return json_error(ident, UNHANDLED_EXCEPTION,   # pylint: disable=star-args
-                                  'unhandled exception', **error)
+                error = {"detail": str(exc), "exception.py": exc_info}
+                return json_error(
+                    ident,
+                    UNHANDLED_EXCEPTION,  # pylint: disable=star-args
+                    "unhandled exception",
+                    **error
+                )
             if ident is not None:
                 return json_result(ident, result)

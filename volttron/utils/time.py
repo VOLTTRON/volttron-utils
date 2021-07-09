@@ -36,8 +36,13 @@
 # under Contract DE-AC05-76RL01830
 # }}}
 
-__all__ = ['format_timestamp', 'parse_timestamp_string', 'get_aware_utc_now', 'get_utc_seconds_from_epoch',
-           'process_timestamp']
+__all__ = [
+    "format_timestamp",
+    "parse_timestamp_string",
+    "get_aware_utc_now",
+    "get_utc_seconds_from_epoch",
+    "process_timestamp",
+]
 
 import calendar
 import datetime
@@ -49,13 +54,14 @@ from tzlocal import get_localzone
 
 _log = logging.getLogger(__name__)
 
+
 def format_timestamp(time_stamp):
     """Create a consistent datetime string representation based on
     ISO 8601 format.
-    
+
     YYYY-MM-DDTHH:MM:SS.mmmmmm for unaware datetime objects.
     YYYY-MM-DDTHH:MM:SS.mmmmmm+HH:MM for aware datetime objects
-    
+
     :param time_stamp: value to convert
     :type time_stamp: datetime
     :returns: datetime in string format
@@ -65,18 +71,16 @@ def format_timestamp(time_stamp):
     time_str = time_stamp.strftime("%Y-%m-%dT%H:%M:%S.%f")
 
     if time_stamp.tzinfo is not None:
-        sign = '+'
+        sign = "+"
         td = time_stamp.tzinfo.utcoffset(time_stamp)
         if td.days < 0:
-            sign = '-'
+            sign = "-"
             td = -td
 
         seconds = td.seconds
         minutes, seconds = divmod(seconds, 60)
         hours, minutes = divmod(minutes, 60)
-        time_str += "{sign}{HH:02}:{MM:02}".format(sign=sign,
-                                                   HH=hours,
-                                                   MM=minutes)
+        time_str += "{sign}{HH:02}:{MM:02}".format(sign=sign, HH=hours, MM=minutes)
 
     return time_str
 
@@ -128,7 +132,7 @@ def parse_timestamp_string(time_stamp_str):
 
 def get_aware_utc_now():
     """Create a timezone aware UTC datetime object from the system time.
-    
+
     :returns: an aware UTC datetime object
     :rtype: datetime
     """
@@ -162,7 +166,7 @@ def get_utc_seconds_from_epoch(timestamp=None):
     return seconds_from_epoch
 
 
-def process_timestamp(timestamp_string, topic=''):
+def process_timestamp(timestamp_string, topic=""):
     """
     Convert timestamp string timezone aware utc timestamp
     @param timestamp_string: datetime string to parse
@@ -176,8 +180,11 @@ def process_timestamp(timestamp_string, topic=''):
     try:
         timestamp = parse_timestamp_string(timestamp_string)
     except (ValueError, TypeError):
-        _log.error("message for {topic} bad timetamp string: {ts_string}"
-                   .format(topic=topic, ts_string=timestamp_string))
+        _log.error(
+            "message for {topic} bad timetamp string: {ts_string}".format(
+                topic=topic, ts_string=timestamp_string
+            )
+        )
         return
 
     if timestamp.tzinfo is None:

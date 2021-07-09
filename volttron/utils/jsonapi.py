@@ -39,12 +39,12 @@
 from json import dump, dumps, load, loads
 
 
-__all__ = ('dump', 'dumpb', 'dumps', 'load', 'loadb', 'loads')
+__all__ = ("dump", "dumpb", "dumps", "load", "loadb", "loads")
 
 
 def dumpb(data, **kwargs):
-    return dumps(data, **kwargs).encode('utf-8')
+    return dumps(data, **kwargs).encode("utf-8")
 
 
 def loadb(s, **kwargs):
-    return loads(s.decode('utf-8'), **kwargs)
+    return loads(s.decode("utf-8"), **kwargs)

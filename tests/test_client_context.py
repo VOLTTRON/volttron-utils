@@ -50,6 +50,10 @@ def test_change_VOLTTRON_HOME_raises_exception(create_volttron_home_fun_scope, m
     
     assert volttron_home == ClientContext.get_volttron_home()
 
+
+def test_change_class_variable_raises_exception(create_volttron_home_fun_scope, monkeypatch, undocontext):
+    ClientContext.__volttron_home__ = "foo"
+
     
 def test_context_in_gevent(create_volttron_home_fun_scope, monkeypatch, undocontext):
 

@@ -45,27 +45,6 @@ import logging
 _log = logging.getLogger(__name__)
 
 
-def get_home():
-    """ Return the home directory with user and variables expanded.
-
-    If the VOLTTRON_HOME environment variable is set, it used.
-    Otherwise, the default value of '~/.volttron' is used.
-    """
-
-    vhome = os.path.abspath(
-        os.path.normpath(
-            os.path.expanduser(
-                os.path.expandvars(
-                    os.environ.get('VOLTTRON_HOME', '~/.volttron')))))
-    if vhome.endswith('/'):
-        vhome = vhome[:-1]
-        if os.environ.get('VOLTTRON_HOME') is not None:
-            _log = logging.getLogger('volttron')
-            _log.warning("Removing / from the end of VOLTTRON_HOME")
-            os.environ['VOLTTRON_HOME'] = vhome
-    return vhome
-
-
 def create_file_if_missing(path, permission=0o660, contents=None):
     dirname = os.path.dirname(path)
     if dirname and not os.path.exists(dirname):
@@ -80,13 +59,17 @@ def create_file_if_missing(path, permission=0o660, contents=None):
     except IOError as exc:
         if exc.errno != errno.ENOENT:
             raise
-        _log.debug('missing file %s', path)
-        _log.info('creating file %s', path)
+        _log.debug("missing file %s", path)
+        _log.info("creating file %s", path)
         fd = os.open(path, os.O_CREAT | os.O_WRONLY, permission)
         success = False
         try:
             if contents:
-                contents = contents if isinstance(contents, bytes) else contents.encode("utf-8")
+                contents = (
+                    contents
+                    if isinstance(contents, bytes)
+                    else contents.encode("utf-8")
+                )
                 os.write(fd, contents)
                 success = True
         except Exception as e:

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "volttron-utils"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["C. Allwardt <craig.allwardt@pnnl.gov>"]
 license = "Apache 2"
@@ -14,8 +14,8 @@ gevent = "20.6.1"
 greenlet = "0.4.16"
 watchdog-gevent = "^0.1.1"
 zmq = "^0.0.0"
-dateutils = "^0.6.12"
-tzlocal = "^2.1"
+dateutils = ">=0.6,<0.7"
+tzlocal = ">=2,<3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.4"
