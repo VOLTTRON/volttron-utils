@@ -42,10 +42,10 @@ class ClientContext:
 
 
     @classmethod
-    def get_config_param(klass, key: str) -> Optional[str]:
+    def get_config_param(klass, key: str, default: Optional[str] = None) -> Optional[str]:
         
         ClientContext.__load_config__()
-        return klass.__config__.get(key)
+        return klass.__config__.get(key, default)
         
 
     @classmethod    
@@ -133,17 +133,8 @@ class ClientContext:
     @classmethod
     def is_secure_mode(klass):
         """Returns True if running in secure mode, False otherwise"""
-        secure_mode = klass.get_config_param('secure-agent-users')
-        if secure_mode is not None:
-            secure_mode = bool(secure_mode)
+        secure_mode = klass.get_config_param('secure-agent-users', False)
+        if secure_mode:
+            secure_mode = secure_mode.upper() == "TRUE"                
         return secure_mode
-        # if not string_value:
-        #     config = load_platform_config()
-        #     string_value = config.get("secure-agent-users", "False")
-        #     _log.debug("value from config {}".format(string_value))
-
-        # if string_value == "True":
-        #     _log.debug("returning True")
-        #     return True
-
-        return False
+        
