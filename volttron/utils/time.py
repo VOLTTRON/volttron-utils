@@ -37,10 +37,9 @@
 # }}}
 
 __all__ = ['format_timestamp', 'parse_timestamp_string', 'get_aware_utc_now', 'get_utc_seconds_from_epoch',
-           'process_timestamp']
+           'process_timestamp', 'fix_sqlite3_datetime']
 
 import calendar
-#import datetime
 from datetime import datetime
 from dateutil.parser import parse
 from dateutil.tz import tzutc, tzoffset
@@ -188,3 +187,23 @@ def process_timestamp(timestamp_string, topic=''):
         original_tz = timestamp.tzinfo
         timestamp = timestamp.astimezone(pytz.UTC)
     return timestamp, original_tz
+
+
+def fix_sqlite3_datetime(sql=None):
+    """Primarily for fixing the base historian cache on certain versions
+    of python.
+    
+    Registers a new datetime converter to that uses dateutil parse. This
+    should
+    better resolve #216, #174, and #91 without the goofy workarounds that
+    change data.
+    
+    Optional sql argument is for testing only.
+    """
+    if sql is None:
+        import sqlite3 as sql
+
+    def parse(time_stamp_bytes):
+        return parse_timestamp_string(time_stamp_bytes.decode("utf-8"))
+    sql.register_adapter(datetime, format_timestamp)
+    sql.register_converter("timestamp", parse)
