@@ -7,8 +7,9 @@ import logging
 import os
 from pathlib import Path
 from posixpath import expanduser
-
 from typing import Optional
+
+from . frozendict import FrozenDict
 
 _log = logging.getLogger(__name__)
 
@@ -20,34 +21,45 @@ class ClientContext:
     """
     __volttron_home__: Optional[Path] = None
     __config__: dict = {}
+    __config_keys__ = ("vip-address", "bind-web-address", "instance-name", "message-bus", 
+                       "web-ssl-cert", "web-ssl-key", "web-secret-key", "secure-agent-users")
 
-    # @classmethod
-    # def __load_config__(klass):
-    #     if __config__ is None:
-    #     __config__ = FrozenDict()
-    #     volttron_home = get_home()
-    #     config_file = os.path.join(volttron_home, "config")
-    #     if os.path.exists(config_file):
-    #         parser = ConfigParser()
-    #         parser.read(config_file)
-    #         options = parser.options("volttron")
-    #         for option in options:
-    #             __config__[option] = parser.get("volttron", option)
-    #         __config__.freeze()
-    # return __config__
+    @classmethod
+    def __load_config__(klass: "ClientContext"):
+        if klass.__config__ is None:
+            klass.__config__ = FrozenDict()
+
+            volttron_home = ClientContext.get_volttron_home()
+            config_file = os.path.join(volttron_home, "config")
+            if os.path.exists(config_file):
+                parser = ConfigParser()
+                parser.read(config_file)
+                options = parser.options("volttron")
+                for option in options:
+                    klass.__config__[option] = parser.get("volttron", option)
+                klass.__config__.freeze()
+        return klass.__config__
 
 
     @classmethod
-    def get_config_param(key: str):
-        pass
-    
-    # def get_config_path() -> str:
-    # """
-    # Returns the platforms main configuration file.
+    def get_config_param(klass, key: str) -> Optional[str]:
+        
+        ClientContext.__load_config__()
+        return klass.__config__.get(key)
+        
 
-    # :return:
-    # """
-    # return os.path.join(get_home(), "config")
+    @classmethod    
+    def is_rabbitmq_available(klass):
+        rabbitmq_available = True
+        try:
+            import pika
+
+            rabbitmq_available = True
+        except ImportError:
+            os.environ["RABBITMQ_NOT_AVAILABLE"] = "True"
+            rabbitmq_available = False
+        return rabbitmq_available
+    
     
     @classmethod
     def get_volttron_home(klass) -> str:            
@@ -73,8 +85,7 @@ class ClientContext:
         # so we test to make sure nothing has changed from vhome and
         # the klass.__volttron_home__ variable.
         if klass.__volttron_home__:
-            hashed = hashlib.md5(str(vhome).encode('utf-8')).hexdigest()
-            if not klass.__volttron_home__.joinpath(hashed).exists():
+            if vhome != klass.__volttron_home__:
                 raise ValueError("VOLTTRON_HOME has been changed.  Possible nefarious act!")
         
         # Initialize class variable here and write a file inside the
@@ -86,10 +97,53 @@ class ClientContext:
                 # python 3.6 doesn't support pathlike object in mkdir
                 os.makedirs(str(vhome), exist_ok=True)
             
-            # Create a file with the hex of the path so that we know when 
-            # it has been manipulated
-            hexhash = hashlib.md5(str(vhome).encode('utf-8')).hexdigest()
-            with open(vhome.joinpath(hexhash), "wt") as fp:
-                fp.write(hexhash)
-
         return str(vhome)
+
+
+    @classmethod
+    def get_fq_identity(klass, identity, platform_instance_name=None):
+        """
+        Return the fully qualified identity for the passed core identity.
+
+        Fully qualified identities are instance_name.identity
+
+        :param identity:
+        :param platform_instance_name: str The name of the platform.
+        :return:
+        """
+        if not platform_instance_name:
+            platform_instance_name = klass.get_config_param('instance-name')
+        return "{platform_instance_name}.{identity}"
+
+
+    @classmethod
+    def get_messagebus(klass):
+        """Get type of message bus - zeromq or rabbbitmq."""
+        return klass.get_config_param('message-bus')
+
+
+    @classmethod
+    def is_web_enabled(klass):
+        """Returns True if web enabled, False otherwise"""
+        if klass.get_config_param('bind-web-address'):
+            return True
+        return False
+
+
+    @classmethod
+    def is_secure_mode(klass):
+        """Returns True if running in secure mode, False otherwise"""
+        secure_mode = klass.get_config_param('secure-agent-users')
+        if secure_mode is not None:
+            secure_mode = bool(secure_mode)
+        return secure_mode
+        # if not string_value:
+        #     config = load_platform_config()
+        #     string_value = config.get("secure-agent-users", "False")
+        #     _log.debug("value from config {}".format(string_value))
+
+        # if string_value == "True":
+        #     _log.debug("returning True")
+        #     return True
+
+        return False
