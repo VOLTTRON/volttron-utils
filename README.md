@@ -1,10 +1,9 @@
-#volttron-utils 
+
+![Passing?](https://github.com/VOLTTRON/volttron-utils/actions/workflows/run-tests.yml/badge.svg)
 
 VOLTTRON™ is an open source platform for distributed sensing and control. The platform provides services for collecting and storing data from buildings and devices and provides an environment for developing applications which interact with that data.
 
 This repository contains utility classes and functions used in [volttron-client](https://github.com/VOLTTRON/volttron-client) and [volttron-server](https://github.com/VOLTTRON/volttron-server).
-
-![Passing?](https://github.com/VOLTTRON/volttron-utils/actions/workflows/run-tests.yml/badge.svg)
 
 ## Requirements
 
