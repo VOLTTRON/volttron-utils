@@ -38,7 +38,7 @@
 # BATTELLE for the UNITED STATES DEPARTMENT OF ENERGY
 # under Contract DE-AC05-76RL01830
 # }}}
-#}}}
+# }}}
 
 
 """Module for storing local public and secret keys and remote public keys"""
@@ -51,7 +51,7 @@ from zmq.utils import z85
 from zmq import curve_keypair
 
 from . import jsonapi, ClientContext as cc
-from . file_access import create_file_if_missing
+from .file_access import create_file_if_missing
 
 
 _log = logging.getLogger(__name__)
@@ -87,12 +87,13 @@ def get_random_key(length: int = 65) -> str:
         raise ValueError("Invalid length specified for random key must be > 0")
 
     import binascii
-    random_key = binascii.hexlify(os.urandom(length)).decode('utf-8')
+
+    random_key = binascii.hexlify(os.urandom(length)).decode("utf-8")
     return random_key
 
 
 def encode_key(key):
-    '''Base64-encode and return a key in a URL-safe manner.'''
+    """Base64-encode and return a key in a URL-safe manner."""
     # There is no easy way to test if key is already base64 encoded and ASCII decoded. This seems the best way.
     if len(key) % 4 != 0:
         return key
@@ -100,7 +101,11 @@ def encode_key(key):
     try:
         assert len(key) in (32, 40)
     except AssertionError:
-        raise AssertionError("Assertion error while encoding key:{}, len:{}".format(key, len(key)))
+        raise AssertionError(
+            "Assertion error while encoding key:{}, len:{}".format(
+                key, len(key)
+            )
+        )
     if len(key) == 40:
         key = z85.decode(key)
     return base64.urlsafe_b64encode(key)[:-1].decode("ASCII")
@@ -113,18 +118,24 @@ class BaseJSONStore(object):
         self.filename = filename
         self.permissions = permissions
         try:
-            created = create_file_if_missing(filename, contents='{}')
+            created = create_file_if_missing(filename, contents="{}")
             if created:
                 # remove access to group
                 os.chmod(filename, permissions)
         except Exception as e:
             import traceback
+
             _log.error(traceback.print_exc())
-            raise RuntimeError("Failed to access KeyStore: {}".format(filename))
+            raise RuntimeError(
+                "Failed to access KeyStore: {}".format(filename)
+            )
 
     def store(self, data):
-        fd = os.open(self.filename, os.O_CREAT | os.O_WRONLY | os.O_TRUNC,
-                     self.permissions)
+        fd = os.open(
+            self.filename,
+            os.O_CREAT | os.O_WRONLY | os.O_TRUNC,
+            self.permissions,
+        )
         try:
             os.write(fd, jsonapi.dumpb(data, indent=4))
         finally:
@@ -132,7 +143,7 @@ class BaseJSONStore(object):
 
     def load(self):
         try:
-            with open(self.filename, 'r') as json_file:
+            with open(self.filename, "r") as json_file:
                 return jsonapi.load(json_file)
         except ValueError:
             # If the file is empty jsonapi.load will raise ValueError
@@ -157,27 +168,35 @@ class BaseJSONStore(object):
 class KeyStore(BaseJSONStore):
     """Handle generation, storage, and retrival of CURVE key pairs"""
 
-    def __init__(self, filename=None, encoded_public=None, encoded_secret=None):
+    def __init__(
+        self, filename=None, encoded_public=None, encoded_secret=None
+    ):
         if filename is None:
             filename = self.get_default_path()
         super(KeyStore, self).__init__(filename)
         if not self.isvalid():
             if encoded_public and encoded_secret:
-                self.store({'public': encoded_public,
-                            'secret': encode_key(encoded_secret)})
+                self.store(
+                    {
+                        "public": encoded_public,
+                        "secret": encode_key(encoded_secret),
+                    }
+                )
             else:
                 _log.debug("calling generate from keystore")
                 self.generate()
 
     @staticmethod
     def get_default_path():
-        return os.path.join(cc.get_volttron_home(), 'keystore')
+        return os.path.join(cc.get_volttron_home(), "keystore")
 
     @staticmethod
     def get_agent_keystore_path(identity=None):
         if identity is None:
             raise AttributeError("invalid identity")
-        return os.path.join(cc.get_volttron_home(), f"keystores/{identity}/keystore.json")
+        return os.path.join(
+            cc.get_volttron_home(), f"keystores/{identity}/keystore.json"
+        )
 
     @staticmethod
     def generate_keypair_dict():
@@ -191,7 +210,9 @@ class KeyStore(BaseJSONStore):
         done = False
         while not done and attempts < max_attempts:
             # Keys that start with '-' are hard to use and cause issues with the platform
-            if encoded_secret.startswith('-') or encoded_public.startswith('-'):
+            if encoded_secret.startswith("-") or encoded_public.startswith(
+                "-"
+            ):
                 # try generating public and secret key again
                 public, secret = curve_keypair()
                 encoded_public = encode_key(public)
@@ -199,8 +220,7 @@ class KeyStore(BaseJSONStore):
             else:
                 done = True
 
-        return {'public': encoded_public,
-                'secret': encoded_secret}
+        return {"public": encoded_public, "secret": encoded_secret}
 
     def generate(self):
         """Generate and store new key pair"""
@@ -217,23 +237,25 @@ class KeyStore(BaseJSONStore):
         key = self.load().get(keyname, None)
         if key:
             try:
-                key.encode('ascii')
+                key.encode("ascii")
             except UnicodeEncodeError:
                 _log.warning(
-                    'Non-ASCII character found for key {} in {}'
-                    .format(keyname, self.filename))
+                    "Non-ASCII character found for key {} in {}".format(
+                        keyname, self.filename
+                    )
+                )
                 key = None
         return key
 
     @property
     def public(self):
         """Return encoded public key"""
-        return self._get_key('public')
+        return self._get_key("public")
 
     @property
     def secret(self):
         """Return encoded secret key"""
-        return self._get_key('secret')
+        return self._get_key("secret")
 
     def isvalid(self):
         """Check if key pair is valid"""
@@ -248,7 +270,6 @@ class KnownHostsStore(BaseJSONStore):
             filename = f"{cc.get_volttron_home()}/known_hosts"
         # all agents need read access to known_hosts file
         super(KnownHostsStore, self).__init__(filename, permissions=0o644)
-
 
     def add(self, addr, server_key):
         self.update({self._parse_addr(addr): server_key})

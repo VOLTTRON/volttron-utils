@@ -46,20 +46,23 @@ from itertools import chain, count, cycle
 import re
 
 
-__all__ = ['cron', 'periodic']
+__all__ = ["cron", "periodic"]
 
-__author__ = 'Brandon Carpenter <brandon.carpenter@pnnl.gov>'
-__copyright__ = 'Copyright (c) 2016, Battelle Memorial Institute'
-__license__ = 'Apache 2.0'
+__author__ = "Brandon Carpenter <brandon.carpenter@pnnl.gov>"
+__copyright__ = "Copyright (c) 2016, Battelle Memorial Institute"
+__license__ = "Apache 2.0"
 
 
-_range_re = re.compile(r'^(.{0}(?=\*)|\w*(?=-)|\w+(?!\*))'
-                       r'(?:[*-]?((?<=\*).{0}|(?<=-)\w*|(?=/).{0}))?'
-                       r'(?:/(\d+))?$', re.I)
+_range_re = re.compile(
+    r"^(.{0}(?=\*)|\w*(?=-)|\w+(?!\*))"
+    r"(?:[*-]?((?<=\*).{0}|(?<=-)\w*|(?=/).{0}))?"
+    r"(?:/(\d+))?$",
+    re.I,
+)
 
 
 def _split_range(string):
-    '''Generator to split cron ranges into (start, end, skip) tuples.
+    """Generator to split cron ranges into (start, end, skip) tuples.
 
     Takes a string of the folloing forms:
 
@@ -68,24 +71,24 @@ def _split_range(string):
 
     where * is equivalent to first-last and yeilds the 3-tuple with each
     iteration.
-    '''
-    for rng in string.split(','):
+    """
+    for rng in string.split(","):
         if not rng:
             continue
         match = _range_re.match(rng)
         if match:
             yield match.groups()
         else:
-            raise ValueError('bad range expresion: {}'.format(rng))
+            raise ValueError("bad range expresion: {}".format(rng))
 
 
 def _convert_item(item, default, translate=None):
-    '''Convert item to an integer.
+    """Convert item to an integer.
 
     Return None if item is None or default if item is the empty string.
     Otherwise, try to convert item using the int() builtin.  If int()
     fails, use the translate function, if given, or re-raise ValueError.
-    '''
+    """
     if item is None:
         return
     if not item:
@@ -99,13 +102,13 @@ def _convert_item(item, default, translate=None):
 
 
 def _convert_range(rng, minimum, maximum, translate=None):
-    '''Convert range 3-tuples to integer lists.
+    """Convert range 3-tuples to integer lists.
 
     If rng evaluates to False, just return int.  Otherwise, convert the
     range values to integers using the minimum as the default for the
     start value, maximum as the default for the end value and translate
     to convert string values.
-    '''
+    """
     if not rng:
         return rng
     first, last, skip = rng
@@ -120,7 +123,7 @@ def _convert_range(rng, minimum, maximum, translate=None):
 
 
 def _coallesce_ranges(fieldname, ranges, minimum, maximum, translate=None):
-    '''Combine multiple ranges into a single sorted list of values.'''
+    """Combine multiple ranges into a single sorted list of values."""
     if not ranges:
         return
     result = set()
@@ -130,32 +133,49 @@ def _coallesce_ranges(fieldname, ranges, minimum, maximum, translate=None):
             continue
         if rng[0] < minimum:
             raise ValueError(
-                    '{} value of {} is below the minimum of {}'.format(
-                    fieldname, rng[0], minimum))
+                "{} value of {} is below the minimum of {}".format(
+                    fieldname, rng[0], minimum
+                )
+            )
         if rng[-1] > maximum:
             raise ValueError(
-                    '{} value of {} is above the maximum of {}'.format(
-                    fieldname, rng[-1], maximum))
+                "{} value of {} is above the maximum of {}".format(
+                    fieldname, rng[-1], maximum
+                )
+            )
         result |= set(rng)
     return tuple(sorted(result)) or None
 
 
 def _translate_month(month, pos):
-    '''Translate month names to integers.'''
+    """Translate month names to integers."""
     try:
-        return ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug',
-                'sep', 'oct', 'nov', 'dec'].index(month[:3].lower()) + 1
+        return [
+            "jan",
+            "feb",
+            "mar",
+            "apr",
+            "may",
+            "jun",
+            "jul",
+            "aug",
+            "sep",
+            "oct",
+            "nov",
+            "dec",
+        ].index(month[:3].lower()) + 1
     except ValueError:
-        raise ValueError('invalid month name: {}'.format(month))
+        raise ValueError("invalid month name: {}".format(month))
 
 
 def _translate_weekday(weekday, pos):
-    '''Translate weekday names to integers.'''
+    """Translate weekday names to integers."""
     try:
-        index = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].index(
-                 weekday[:3].lower()) + 1
+        index = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"].index(
+            weekday[:3].lower()
+        ) + 1
     except ValueError:
-        raise ValueError('invalid day name: {}'.format(weekday))
+        raise ValueError("invalid day name: {}".format(weekday))
     # If Sunday is is in the start position, return it as 0
     if index == 7 and not pos:
         index = 0
@@ -165,16 +185,19 @@ def _translate_weekday(weekday, pos):
 def parse_cron_string(cron_string):
     fields = cron_string.split()
     if len(fields) > 5:
-        raise ValueError('too many fields in cron string')
+        raise ValueError("too many fields in cron string")
     elif len(fields) < 5:
-        raise ValueError('too few fields in cron string')
+        raise ValueError("too few fields in cron string")
     minute, hour, day, month, weekday = [
-            None if field == '*' else _split_range(field) for field in fields]
-    return (_coallesce_ranges('minute', minute, 0, 59),
-            _coallesce_ranges('hour', hour, 0, 23),
-            _coallesce_ranges('day', day, 1, 31),
-            _coallesce_ranges('month', month, 1, 12, _translate_month),
-            _coallesce_ranges('weekday', weekday, 0, 7, _translate_weekday))
+        None if field == "*" else _split_range(field) for field in fields
+    ]
+    return (
+        _coallesce_ranges("minute", minute, 0, 59),
+        _coallesce_ranges("hour", hour, 0, 23),
+        _coallesce_ranges("day", day, 1, 31),
+        _coallesce_ranges("month", month, 1, 12, _translate_month),
+        _coallesce_ranges("weekday", weekday, 0, 7, _translate_weekday),
+    )
 
 
 def _start_stop(start, stop):
@@ -193,7 +216,7 @@ def _start_stop(start, stop):
 
 
 def cron(cron_string, start=None, stop=None, second=0):
-    '''Return a schedule generator from a cron-style string.
+    """Return a schedule generator from a cron-style string.
 
     cron_string is a cron-style time expression consisting of five
     whitespace-separated fields explained in further detail below.
@@ -249,10 +272,10 @@ def cron(cron_string, start=None, stop=None, second=0):
     not contain the "*" character), then both are used to compute
     date/time values.  For example, "30 4 1,15 * 5" is interpreted as
     "4:30 am on the 1st and 15th of each month, plus every Friday."
-    '''
+    """
 
     if not 0 <= second < 60:
-        raise ValueError('second is out of the range [0, 59]')
+        raise ValueError("second is out of the range [0, 59]")
     minutes, hours, days, months, weekdays = parse_cron_string(cron_string)
     # Convert 0-Sunday to 7-Sunday to match datetime.isoweekday()
     if weekdays and weekdays[0] == 0:
@@ -262,8 +285,9 @@ def cron(cron_string, start=None, stop=None, second=0):
         unsafe = set([(2, 30), (2, 31), (4, 31), (6, 31), (9, 31), (11, 31)])
         combos = set([(m, d) for m in months for d in days])
         if not combos - unsafe:
-            raise ValueError('given months and days produce only '
-                             'impossible combinations')
+            raise ValueError(
+                "given months and days produce only " "impossible combinations"
+            )
 
     start, stop = _start_stop(start, stop)
 
@@ -273,43 +297,73 @@ def cron(cron_string, start=None, stop=None, second=0):
     minutes = minutes or list(range(0, 60))
 
     def _weekdays(year, month, day=1):
-        '''Iterate over all the days in weekdays for the given year and
+        """Iterate over all the days in weekdays for the given year and
         month starting with day.
-        '''
+        """
         dt = date(year, month, day)
         weekday = dt.isoweekday()
         i = bisect_left(weekdays, weekday)
-        dt += timedelta(weekdays[i] - weekday if i < len(weekdays)
-                        else weekdays[0] + 7 - weekday)
+        dt += timedelta(
+            weekdays[i] - weekday
+            if i < len(weekdays)
+            else weekdays[0] + 7 - weekday
+        )
         day, weekday = dt.day, dt.isoweekday()
-        for next in chain(weekdays[i + 1:], cycle(weekdays)):
+        for next in chain(weekdays[i + 1 :], cycle(weekdays)):
             if day > 31:
                 break
             yield day
-            day, weekday = day + (next - weekday if next > weekday
-                                  else next + 7 - weekday), next
+            day, weekday = (
+                day
+                + (next - weekday if next > weekday else next + 7 - weekday),
+                next,
+            )
 
     # Handle special case when the start month and day are in the set
     if start.month in months:
-        if (not (days or weekdays) or days and start.day in days or
-                weekdays and start.isoweekday() in weekdays):
+        if (
+            not (days or weekdays)
+            or days
+            and start.day in days
+            or weekdays
+            and start.isoweekday() in weekdays
+        ):
             if start.hour in hours:
-                for minute in minutes[bisect_right(minutes, start.minute):]:
-                    yield datetime(start.year, start.month, start.day, start.hour, minute, second)
-            for hour in hours[bisect_right(hours, start.hour):]:
+                for minute in minutes[bisect_right(minutes, start.minute) :]:
+                    yield datetime(
+                        start.year,
+                        start.month,
+                        start.day,
+                        start.hour,
+                        minute,
+                        second,
+                    )
+            for hour in hours[bisect_right(hours, start.hour) :]:
                 for minute in minutes:
-                    yield datetime(start.year, start.month, start.day, hour, minute, second)
+                    yield datetime(
+                        start.year,
+                        start.month,
+                        start.day,
+                        hour,
+                        minute,
+                        second,
+                    )
         first_month = [(start.year, start.month, start.day + 1)]
     else:
         first_month = []
 
     # Iterate over all values until stop is hit
-    for year, month, first_day in chain(first_month,
-            ((start.year, m, 1) for m in months[bisect_right(months, start.month):]),
-            ((y, m, 1) for y in count(start.year + 1) for m in months)):
+    for year, month, first_day in chain(
+        first_month,
+        (
+            (start.year, m, 1)
+            for m in months[bisect_right(months, start.month) :]
+        ),
+        ((y, m, 1) for y in count(start.year + 1) for m in months),
+    ):
         try:
             if days:
-                _days = days[bisect_left(days, first_day):]
+                _days = days[bisect_left(days, first_day) :]
                 if weekdays:
                     _days = merge(_days, _weekdays(year, month, first_day))
             elif weekdays:

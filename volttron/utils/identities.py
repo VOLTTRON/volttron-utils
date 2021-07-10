@@ -37,7 +37,7 @@
 # }}}
 
 
-__all__ = ['is_valid_identity', 'normalize_identity']
+__all__ = ["is_valid_identity", "normalize_identity"]
 
 import re
 
@@ -46,7 +46,7 @@ _VALID_IDENTITY_RE = re.compile(r"^[A-Za-z0-9_.-]+$")
 
 
 def is_valid_identity(identity_to_check):
-    """ Checks the passed identity to see if it contains invalid characters
+    """Checks the passed identity to see if it contains invalid characters
 
     A None value for identity_to_check will return False
 
@@ -72,6 +72,6 @@ def normalize_identity(pre_identity):
         if _VALID_IDENTITY_RE.match(s):
             norm += s
         else:
-            norm += '_'
+            norm += "_"
 
     return norm

@@ -36,7 +36,7 @@
 # under Contract DE-AC05-76RL01830
 # }}}
 
-__all__ = ['create_file_if_missing']
+__all__ = ["create_file_if_missing"]
 
 import os
 import errno
@@ -60,13 +60,17 @@ def create_file_if_missing(path, permission=0o660, contents=None):
     except IOError as exc:
         if exc.errno != errno.ENOENT:
             raise
-        _log.debug('missing file %s', path)
-        _log.info('creating file %s', path)
+        _log.debug("missing file %s", path)
+        _log.info("creating file %s", path)
         fd = os.open(path, os.O_CREAT | os.O_WRONLY, permission)
         success = False
         try:
             if contents:
-                contents = contents if isinstance(contents, bytes) else contents.encode("utf-8")
+                contents = (
+                    contents
+                    if isinstance(contents, bytes)
+                    else contents.encode("utf-8")
+                )
                 os.write(fd, contents)
                 success = True
         except Exception as e:

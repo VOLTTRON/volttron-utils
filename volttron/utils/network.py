@@ -87,7 +87,10 @@ def get_address(verify_listening=False):
     if not address:
         # Connect via virtual unix socket if linux platform (mac doesn't have @ in it)
         abstract = "@" if sys.platform.startswith("linux") else ""
-        address = "ipc://%s%s/run/vip.socket" % (abstract, cc.get_volttron_home())
+        address = "ipc://%s%s/run/vip.socket" % (
+            abstract,
+            cc.get_volttron_home(),
+        )
 
     import zmq.green as zmqgreen
     import zmq

@@ -36,7 +36,7 @@
 # under Contract DE-AC05-76RL01830
 # }}}
 
-__all__ = ['VolttronHomeFileReloader', 'AbsolutePathFileReloader']
+__all__ = ["VolttronHomeFileReloader", "AbsolutePathFileReloader"]
 
 import logging
 
@@ -52,16 +52,23 @@ class VolttronHomeFileReloader(PatternMatchingEventHandler):
     For example filetowatch auth.json with watch file <volttron_home>/auth.json.
     filetowatch *.json will watch all json files in <volttron_home>
     """
+
     def __init__(self, filetowatch, callback):
         # Protect from circular reference for file
         from volttron.platform import get_home
 
-        super(VolttronHomeFileReloader, self).__init__([get_home() + '/' + filetowatch])
-        _log.debug("patterns is {}".format([get_home() + '/' + filetowatch]))
+        super(VolttronHomeFileReloader, self).__init__(
+            [get_home() + "/" + filetowatch]
+        )
+        _log.debug("patterns is {}".format([get_home() + "/" + filetowatch]))
         self._callback = callback
 
     def on_any_event(self, event):
-        _log.debug("Calling callback on event {}. Calling {}".format(event, self._callback))
+        _log.debug(
+            "Calling callback on event {}. Calling {}".format(
+                event, self._callback
+            )
+        )
         try:
             self._callback()
         except BaseException as e:
@@ -76,6 +83,7 @@ class AbsolutePathFileReloader(PatternMatchingEventHandler):
     For example filetowatch auth.json with watch file <volttron_home>/auth.json.
     filetowatch *.json will watch all json files in <volttron_home>
     """
+
     def __init__(self, filetowatch, callback):
         super(AbsolutePathFileReloader, self).__init__([filetowatch])
         self._callback = callback
@@ -86,7 +94,11 @@ class AbsolutePathFileReloader(PatternMatchingEventHandler):
         return self._filetowatch
 
     def on_any_event(self, event):
-        _log.debug("Calling callback on event {}. Calling {}".format(event, self._callback))
+        _log.debug(
+            "Calling callback on event {}. Calling {}".format(
+                event, self._callback
+            )
+        )
         try:
             self._callback(self._filetowatch)
         except BaseException as e:
