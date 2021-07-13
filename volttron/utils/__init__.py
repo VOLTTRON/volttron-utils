@@ -57,7 +57,8 @@ except ModuleNotFoundError:
 # Try to get the version from written metadata, but
 # if failed then get it from the pyproject.toml file
 try:
-    __version__ = importlib_metadata.version(__name__)
+    # Note this is the wheel prefix or the name attribute in pyproject.toml file.
+    __version__ = importlib_metadata.version('volttron-utils')
 except importlib_metadata.PackageNotFoundError:
     # We should be in a develop environment therefore
     # we can get the version from the toml pyproject.toml
