@@ -3,17 +3,18 @@ import pytest
 
 from volttron.utils.frozendict import FrozenDict
 
+
 def test_frozen_dict():
     fd = FrozenDict()
     fd.freeze()
 
     with pytest.raises(TypeError) as ex:
-        fd['foo'] = 'bar'
+        fd["foo"] = "bar"
 
-    assert 'foo' not in fd.keys()
+    assert "foo" not in fd.keys()
     assert "Attempted assignment to a frozen dict" == ex.value.args[0]
 
-    # TODO handle htis case.    
+    # TODO handle htis case.
     # fd.update({"alpha": "beta"})
 
     # print(list(fd.keys()))

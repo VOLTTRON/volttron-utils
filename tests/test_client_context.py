@@ -21,12 +21,14 @@ def undocontext():
 def test_default_VOLTTRON_HOME(undocontext):
     # must be ~/.volttron as default
     path = Path("~/.volttron").expanduser().resolve()
-    
+
     assert str(path) == ClientContext.get_volttron_home()
     assert Path(path).exists()
 
 
-def test_can_use_VOLTTRON_HOME_DIR(create_volttron_home_fun_scope, monkeypatch, undocontext):
+def test_can_use_VOLTTRON_HOME_DIR(
+    create_volttron_home_fun_scope, monkeypatch, undocontext
+):
 
     original_volttron_home = create_volttron_home_fun_scope
     monkeypatch.setenv("VOLTTRON_HOME", original_volttron_home)
@@ -35,27 +37,29 @@ def test_can_use_VOLTTRON_HOME_DIR(create_volttron_home_fun_scope, monkeypatch, 
 
     assert original_volttron_home == volttron_home
     assert Path(volttron_home).exists()
-    
 
-def test_change_VOLTTRON_HOME_raises_exception(create_volttron_home_fun_scope, monkeypatch, undocontext):
-    
+
+def test_change_VOLTTRON_HOME_raises_exception(
+    create_volttron_home_fun_scope, monkeypatch, undocontext
+):
+
     volttron_home = ClientContext.get_volttron_home()
-    
+
     monkeypatch.setenv("VOLTTRON_HOME", "~/differnt_vhome")
-    
+
     with pytest.raises(ValueError):
         other_vhome = ClientContext.get_volttron_home()
 
     monkeypatch.setenv("VOLTTRON_HOME", volttron_home)
-    
+
     assert volttron_home == ClientContext.get_volttron_home()
 
-    
+
 def test_context_in_gevent(create_volttron_home_fun_scope, monkeypatch, undocontext):
 
     # random volttron_home
     my_original = create_volttron_home_fun_scope
-            
+
     def in_gevent():
         nonlocal my_original
         changed = "/tmp/volttron/test/t1"
@@ -68,7 +72,7 @@ def test_context_in_gevent(create_volttron_home_fun_scope, monkeypatch, undocont
         monkeypatch.setenv("VOLTTRON_HOME", my_original)
         # make sure the path didn't get created during this.
         assert not os.path.exists(changed)
-    
+
     monkeypatch.setenv("VOLTTRON_HOME", my_original)
     original = ClientContext.get_volttron_home()
     assert my_original == original

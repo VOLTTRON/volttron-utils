@@ -1,5 +1,8 @@
 from zmq.sugar.frame import Frame
-from volttron.utils.frame_serialization import deserialize_frames, serialize_frames
+from volttron.utils.frame_serialization import (
+    deserialize_frames,
+    serialize_frames,
+)
 
 
 def test_can_deserialize_homogeneous_string():

@@ -43,6 +43,7 @@
 
 """Module for storing local public and secret keys and remote public keys"""
 import base64
+import binascii
 import logging
 import os
 import urllib
@@ -55,6 +56,8 @@ from .file_access import create_file_if_missing
 
 
 _log = logging.getLogger(__name__)
+
+BASE64_ENCODED_CURVE_KEY_LEN = 43
 
 
 def get_server_keys():
@@ -102,13 +105,33 @@ def encode_key(key):
         assert len(key) in (32, 40)
     except AssertionError:
         raise AssertionError(
-            "Assertion error while encoding key:{}, len:{}".format(
-                key, len(key)
-            )
+            "Assertion error while encoding key:{}, len:{}".format(key, len(key))
         )
     if len(key) == 40:
         key = z85.decode(key)
     return base64.urlsafe_b64encode(key)[:-1].decode("ASCII")
+
+
+def decode_key(key):
+    """Parse and return a Z85 encoded key from other encodings."""
+    if isinstance(key, str):
+        key = key.encode("ASCII")
+    length = len(key)
+    if length == 40:
+        return key
+    elif length == 43:
+        return z85.encode(base64.urlsafe_b64decode(key + "=".encode("ASCII")))
+    elif length == 44:
+        return z85.encode(base64.urlsafe_b64decode(key))
+    elif length == 54:
+        return base64.urlsafe_b64decode(key + "==".encode("ASCII"))
+    elif length == 56:
+        return base64.urlsafe_b64decode(key)
+    elif length == 64:
+        return z85.encode(binascii.unhexlify(key))
+    elif length == 80:
+        return binascii.unhexlify(key)
+    raise ValueError("unknown key encoding")
 
 
 class BaseJSONStore(object):
@@ -126,9 +149,7 @@ class BaseJSONStore(object):
             import traceback
 
             _log.error(traceback.print_exc())
-            raise RuntimeError(
-                "Failed to access KeyStore: {}".format(filename)
-            )
+            raise RuntimeError("Failed to access KeyStore: {}".format(filename))
 
     def store(self, data):
         fd = os.open(
@@ -168,9 +189,7 @@ class BaseJSONStore(object):
 class KeyStore(BaseJSONStore):
     """Handle generation, storage, and retrival of CURVE key pairs"""
 
-    def __init__(
-        self, filename=None, encoded_public=None, encoded_secret=None
-    ):
+    def __init__(self, filename=None, encoded_public=None, encoded_secret=None):
         if filename is None:
             filename = self.get_default_path()
         super(KeyStore, self).__init__(filename)
@@ -210,9 +229,7 @@ class KeyStore(BaseJSONStore):
         done = False
         while not done and attempts < max_attempts:
             # Keys that start with '-' are hard to use and cause issues with the platform
-            if encoded_secret.startswith("-") or encoded_public.startswith(
-                "-"
-            ):
+            if encoded_secret.startswith("-") or encoded_public.startswith("-"):
                 # try generating public and secret key again
                 public, secret = curve_keypair()
                 encoded_public = encode_key(public)

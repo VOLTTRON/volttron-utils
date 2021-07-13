@@ -88,9 +88,7 @@ class ClientContext:
 
         # vhome to test against for modification.
         vhome = (
-            Path(os.environ.get("VOLTTRON_HOME", "~/.volttron"))
-            .expanduser()
-            .resolve()
+            Path(os.environ.get("VOLTTRON_HOME", "~/.volttron")).expanduser().resolve()
         )
 
         # klass variable is set the first time through this function

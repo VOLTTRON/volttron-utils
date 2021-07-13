@@ -30,7 +30,7 @@ def create_volttron_home(monkeypatch) -> str:
     os.makedirs(volttron_home)
 
     monkeypatch.setenv("VOLTTRON_HOME", volttron_home)
-    
+
     return volttron_home
 
 
@@ -42,6 +42,7 @@ def create_volttron_home_fun_scope(monkeypatch):
     yield volttron_home
 
     shutil.rmtree(volttron_home, ignore_errors=True)
+
 
 @pytest.fixture(scope="module")
 def create_volttron_home_mod_scope(monkeypatch):

@@ -36,11 +36,20 @@
 # under Contract DE-AC05-76RL01830
 # }}}
 
-__all__ = ["VolttronHomeFileReloader", "AbsolutePathFileReloader"]
+__all__ = [
+    "VolttronHomeFileReloader",
+    "AbsolutePathFileReloader",
+    "watch_file",
+    "watch_file_with_fullpath",
+]
 
 import logging
+import os
 
+from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
+
+from volttron.utils import ClientContext as cc
 
 _log = logging.getLogger(__name__)
 
@@ -54,20 +63,15 @@ class VolttronHomeFileReloader(PatternMatchingEventHandler):
     """
 
     def __init__(self, filetowatch, callback):
-        # Protect from circular reference for file
-        from volttron.platform import get_home
-
         super(VolttronHomeFileReloader, self).__init__(
-            [get_home() + "/" + filetowatch]
+            [f"{cc.get_volttron_home()}/{filetowatch}"]
         )
-        _log.debug("patterns is {}".format([get_home() + "/" + filetowatch]))
+        _log.debug(f"patterns is {cc.get_volttron_home()}/{filetowatch}")
         self._callback = callback
 
     def on_any_event(self, event):
         _log.debug(
-            "Calling callback on event {}. Calling {}".format(
-                event, self._callback
-            )
+            "Calling callback on event {}. Calling {}".format(event, self._callback)
         )
         try:
             self._callback()
@@ -95,12 +99,45 @@ class AbsolutePathFileReloader(PatternMatchingEventHandler):
 
     def on_any_event(self, event):
         _log.debug(
-            "Calling callback on event {}. Calling {}".format(
-                event, self._callback
-            )
+            "Calling callback on event {}. Calling {}".format(event, self._callback)
         )
         try:
             self._callback(self._filetowatch)
         except BaseException as e:
             _log.error("Exception in callback: {}".format(e))
         _log.debug("After callback on event {}".format(event))
+
+
+def watch_file(fullpath, callback):
+    """Run callback method whenever the file changes
+
+    Not available on OS X/MacOS.
+    """
+
+    dirname, filename = os.path.split(fullpath)
+    _log.info(
+        "Adding file watch for %s dirname=%s, filename=%s",
+        fullpath,
+        cc.get_volttron_home(),
+        filename,
+    )
+    observer = Observer()
+    observer.schedule(
+        VolttronHomeFileReloader(filename, callback),
+        path=cc.get_volttron_home(),
+    )
+    observer.start()
+    _log.info("Added file watch for %s", fullpath)
+
+
+def watch_file_with_fullpath(fullpath, callback):
+    """Run callback method whenever the file changes
+
+    Not available on OS X/MacOS.
+    """
+    dirname, filename = os.path.split(fullpath)
+    _log.info("Adding file watch for %s", fullpath)
+    _observer = Observer()
+    _observer.schedule(AbsolutePathFileReloader(fullpath, callback), dirname)
+    _log.info("Added file watch for %s", fullpath)
+    _observer.start()
