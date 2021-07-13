@@ -22,6 +22,7 @@ dateutils = "^0.6.12"
 tzlocal = "^2.1"
 cryptography = "2.3"
 pyOpenSSL = "19.0.0"
+psutil = "^5.8.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.4"
