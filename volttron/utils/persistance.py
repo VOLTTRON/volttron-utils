@@ -123,7 +123,7 @@ class PersistentDict(dict):
         elif format == "pickle":
             pickle.dump(dict(contents), fileobj, 2)
         else:
-            raise NotImplementedError("Unknown format: " + repr(self.format))
+            raise NotImplementedError("Unknown format: " + repr(PersistentDict.format))
 
     def _load(self, fileobj):
         # try formats from most restrictive to least restrictive
