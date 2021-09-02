@@ -23,7 +23,6 @@ def fun2(messages):
     messages.put("fun2-2")
 
 
-@pytest.mark.gevent
 def test_yielding(messages):
     gevent.joinall([gevent.spawn(fun1, messages), gevent.spawn(fun2, messages)])
     messages.put(StopIteration)
