@@ -312,7 +312,7 @@ class SubParsersAction(_argparse._SubParsersAction):
             parser = self._name_parser_map[parser_name]
         except KeyError:
             tup = parser_name, ", ".join(self._name_parser_map)
-            msg = _("unknown parser %r (choices: %s)") % tup
+            msg = ("unknown parser %r (choices: %s)") % tup
             raise _argparse.ArgumentError(self, msg)
 
         # parse all the remaining options into the namespace
