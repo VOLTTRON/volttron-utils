@@ -73,3 +73,27 @@ except importlib_metadata.PackageNotFoundError:
     pyproject = toml.load(tomle_file)
 
     __version__ = pyproject["tool"]["poetry"]["version"]
+
+
+def load_config(config_path):
+    """Load a JSON-encoded configuration file."""
+    if config_path is None:
+        _log.info("AGENT_CONFIG does not exist in environment. load_config returning empty configuration.")
+        return {}
+
+    if not os.path.exists(config_path):
+        _log.info("Config file specified by AGENT_CONFIG does not exist. load_config returning empty configuration.")
+        return {}
+
+    # First attempt parsing the file with a yaml parser (allows comments natively)
+    # Then if that fails we fallback to our modified json parser.
+    try:
+        with open(config_path) as f:
+            return yaml.safe_load(f.read())
+    except yaml.scanner.ScannerError as e:
+        try:
+            with open(config_path) as f:
+                return parse_json_config(f.read())
+        except Exception as e:
+            _log.error("Problem parsing agent configuration")
+            raise

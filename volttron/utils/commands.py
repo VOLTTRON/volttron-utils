@@ -38,9 +38,11 @@
 
 __all__ = [
     "execute_command",
+    "vip_main",
     "is_volttron_running",
     "wait_for_volttron_startup",
     "wait_for_volttron_shutdown",
+    "start_agent_thread"
 ]
 
 import logging
@@ -52,7 +54,11 @@ import sys
 import gevent
 import psutil
 
-from ..utils import ClientContext as cc, get_address, is_valid_identity
+from ..utils import (
+    ClientContext as cc,
+    get_address,
+    is_valid_identity
+)
 
 _log = logging.getLogger(__name__)
 
@@ -148,6 +154,7 @@ def vip_main(agent_class, identity=None, version="0.1", **kwargs):
         # certs = Certs()
         if agent_class.__name__ == "Agent":
             agent = agent_class(
+                config_path=config,
                 identity=identity,
                 address=address,
                 agent_uuid=agent_uuid,
@@ -158,6 +165,7 @@ def vip_main(agent_class, identity=None, version="0.1", **kwargs):
             )
         else:
             agent = agent_class(
+                config_path=config,
                 identity=identity,
                 address=address,
                 agent_uuid=agent_uuid,
