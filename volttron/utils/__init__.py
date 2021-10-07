@@ -36,6 +36,7 @@
 # under Contract DE-AC05-76RL01830
 # }}}
 
+import yaml
 
 from .context import *
 from .identities import *
