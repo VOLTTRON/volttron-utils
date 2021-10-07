@@ -74,6 +74,8 @@ except importlib_metadata.PackageNotFoundError:
 
     __version__ = pyproject["tool"]["poetry"]["version"]
 
+_log = logging.getLogger(__name__)
+
 
 def load_config(config_path):
     """Load a JSON-encoded configuration file."""
