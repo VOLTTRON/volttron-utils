@@ -473,7 +473,7 @@ python-versions = "*"
 name = "pyyaml"
 version = "5.4.1"
 description = "YAML parser and emitter for Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
 
@@ -643,7 +643,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.6.2,<4.0"
-content-hash = "8bb422a7c381d18875ff199ad7bc7f9996ed8f2eaaa7258bad763d9daf0e1fdc"
+content-hash = "7c07163fe3ebdbd78d22e279849281ad740dccfa9c81c5c27dfd6887f15460df"
 
 [metadata.files]
 asn1crypto = [

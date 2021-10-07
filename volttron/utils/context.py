@@ -34,9 +34,9 @@ class ClientContext:
     )
 
     @classmethod
-    def __load_config__(klass: "ClientContext"):
-        if klass.__config__ is None:
-            klass.__config__ = FrozenDict()
+    def __load_config__(cls: "ClientContext"):
+        if cls.__config__ is None:
+            cls.__config__ = FrozenDict()
 
             volttron_home = ClientContext.get_volttron_home()
             config_file = os.path.join(volttron_home, "config")
@@ -45,20 +45,20 @@ class ClientContext:
                 parser.read(config_file)
                 options = parser.options("volttron")
                 for option in options:
-                    klass.__config__[option] = parser.get("volttron", option)
-                klass.__config__.freeze()
-        return klass.__config__
+                    cls.__config__[option] = parser.get("volttron", option)
+                cls.__config__.freeze()
+        return cls.__config__
 
     @classmethod
     def get_config_param(
-        klass, key: str, default: Optional[str] = None
+        cls, key: str, default: Optional[str] = None
     ) -> Optional[str]:
 
         ClientContext.__load_config__()
-        return klass.__config__.get(key, default)
+        return cls.__config__.get(key, default)
 
     @classmethod
-    def is_rabbitmq_available(klass):
+    def is_rabbitmq_available(cls):
         rabbitmq_available = True
         try:
             import pika
@@ -70,7 +70,7 @@ class ClientContext:
         return rabbitmq_available
 
     @classmethod
-    def get_volttron_home(klass) -> str:
+    def get_volttron_home(cls) -> str:
         """
         Return the VOLTTRON_HOME directory specified or default directory.
 
@@ -91,19 +91,19 @@ class ClientContext:
             Path(os.environ.get("VOLTTRON_HOME", "~/.volttron")).expanduser().resolve()
         )
 
-        # klass variable is set the first time through this function
+        # cls variable is set the first time through this function
         # so we test to make sure nothing has changed from vhome and
-        # the klass.__volttron_home__ variable.
-        if klass.__volttron_home__:
-            if vhome != klass.__volttron_home__:
+        # the cls.__volttron_home__ variable.
+        if cls.__volttron_home__:
+            if vhome != cls.__volttron_home__:
                 raise ValueError(
                     "VOLTTRON_HOME has been changed.  Possible nefarious act!"
                 )
 
         # Initialize class variable here and write a file inside the
         # volttron_home that we can check against.
-        if klass.__volttron_home__ is None:
-            klass.__volttron_home__ = vhome
+        if cls.__volttron_home__ is None:
+            cls.__volttron_home__ = vhome
 
             if not vhome.exists():
                 # python 3.6 doesn't support pathlike object in mkdir
@@ -112,7 +112,7 @@ class ClientContext:
         return str(vhome)
 
     @classmethod
-    def get_fq_identity(klass, identity, platform_instance_name=None):
+    def get_fq_identity(cls, identity, platform_instance_name=None):
         """
         Return the fully qualified identity for the passed core identity.
 
@@ -123,30 +123,30 @@ class ClientContext:
         :return:
         """
         if not platform_instance_name:
-            platform_instance_name = klass.get_config_param("instance-name")
+            platform_instance_name = cls.get_config_param("instance-name")
         return "{platform_instance_name}.{identity}"
 
     @classmethod
-    def get_messagebus(klass):
+    def get_messagebus(cls):
         """Get type of message bus - zeromq or rabbbitmq."""
-        return klass.get_config_param("message-bus")
+        return cls.get_config_param("message-bus")
 
     @classmethod
-    def get_instance_name(klass):
+    def get_instance_name(cls):
         """Get type of message bus - zeromq or rabbbitmq."""
-        return klass.get_config_param("instance-name")
+        return cls.get_config_param("instance-name")
 
     @classmethod
-    def is_web_enabled(klass):
+    def is_web_enabled(cls):
         """Returns True if web enabled, False otherwise"""
-        if klass.get_config_param("bind-web-address"):
+        if cls.get_config_param("bind-web-address"):
             return True
         return False
 
     @classmethod
-    def is_secure_mode(klass):
+    def is_secure_mode(cls):
         """Returns True if running in secure mode, False otherwise"""
-        secure_mode = klass.get_config_param("secure-agent-users", False)
+        secure_mode = cls.get_config_param("secure-agent-users", False)
         if secure_mode:
             secure_mode = secure_mode.upper() == "TRUE"
         return secure_mode
