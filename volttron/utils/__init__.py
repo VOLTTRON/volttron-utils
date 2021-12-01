@@ -36,6 +36,7 @@
 # under Contract DE-AC05-76RL01830
 # }}}
 
+from pbr.version import VersionInfo
 import yaml
 
 from .context import *
@@ -49,33 +50,8 @@ from .jsonapi import strip_comments, parse_json_config
 from .messagebus import store_message_bus_config
 from .logging import *
 
-# python3.8 and above have this implementation.
-try:
-    import importlib.metadata as importlib_metadata
-except ModuleNotFoundError:
-    import importlib_metadata
-
-# Try to get the version from written metadata, but
-# if failed then get it from the pyproject.toml file
-try:
-    # Note this is the wheel prefix or the name attribute in pyproject.toml file.
-    __version__ = importlib_metadata.version('volttron-utils')
-except importlib_metadata.PackageNotFoundError:
-    # We should be in a develop environment therefore
-    # we can get the version from the toml pyproject.toml
-    root = Path(__file__).parent.parent.parent
-    tomle_file = root.joinpath("pyproject.toml")
-    if not tomle_file.exists():
-        raise ValueError(
-            f"Couldn't find pyproject.toml file for finding version. ({str(tomle_file)})"
-        )
-    import toml
-
-    pyproject = toml.load(tomle_file)
-
-    __version__ = pyproject["tool"]["poetry"]["version"]
-
 _log = logging.getLogger(__name__)
+__version__ = VersionInfo("volttron.utils")
 
 
 def load_config(config_path):
