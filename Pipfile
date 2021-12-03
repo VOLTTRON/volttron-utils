@@ -1,0 +1,28 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[dev-packages]
+pipenv-setup = "*"
+flake8 = ">=3.9.2"
+pytest = ">=6.2.4"
+pre-commit = ">=2.14.1"
+twine = "*"
+
+[requires]
+python_version = "3.8.10"
+
+[packages]
+gevent = "==20.6.1"
+greenlet = "==0.4.16"
+watchdog-gevent = ">=0.1.1"
+zmq = "*"
+dateutils = ">=0.6.7"
+tzlocal = "==2.1"
+cryptography = "==2.3"
+pyopenssl = "==19.0.0"
+psutil = ">=5.7.0"
+pyyaml = ">=5.4.1"
+pbr = "*"
+
