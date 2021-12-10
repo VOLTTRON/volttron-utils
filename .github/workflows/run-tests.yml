@@ -19,6 +19,7 @@ jobs:
         run: pip install pipenv
       - name: Run Tests
         run: |
+          pipenv --python "${{ matrix.python-version }}"
           pipenv install --dev
           pipenv run pytest
 #
