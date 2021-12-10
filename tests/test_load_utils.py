@@ -3,10 +3,11 @@ from volttron.utils import load_config
 
 
 def test_load_config_json():
-    load_config()
+    with pytest.raises(ValueError):
+        load_config(None)
 
 
 def test_raise_exception_no_file():
 
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(ValueError):
         load_config("")
