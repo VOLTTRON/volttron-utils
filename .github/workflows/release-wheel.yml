@@ -9,7 +9,7 @@ on:
 jobs:
   release_job:
     env:
-      TWINE_USERNAME: craig8
+      TWINE_USERNAME: __token__
       #TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
       TWINE_PASSWORD: ${{ secrets.TEST_PYPI_TOKEN }}
 
