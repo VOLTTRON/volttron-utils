@@ -26,7 +26,7 @@ jobs:
           pipenv install
           pipenv run pip install twine
           pipenv run python setup.py bdist_wheel sdist
-          pipenv run twine upload -r testpypi --non-interactive dist/*
+          pipenv run twine upload --verbose -r testpypi --non-interactive dist/*
 
 
 #    steps:
