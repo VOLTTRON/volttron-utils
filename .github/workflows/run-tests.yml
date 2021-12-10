@@ -6,30 +6,38 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.7, 3.8]
+        python-version: [3.8, 3.9]
         poetry-version: [1.1.6]
-        os: [ubuntu-18.04, ubuntu-20.04] #, macos-latest, windows-latest]
+        os: [ubuntu-20.04] #, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Run image
-        uses: abatilo/actions-poetry@v2.0.0
-        with:
-          poetry-version: ${{ matrix.poetry-version }}
-      - name: Install Version
+      - name: Install pipenv into version ${{ matrix.python-version}}
+        run: pip install pipenv
+      - name: Run Tests
         run: |
-          poetry install --no-dev
-          poetry run pip install flake8 pytest black
-          # stop the build if there are Python syntax errors or undefined names
-          poetry run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          poetry run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-      
-      - name: Test with pytest
-        run: poetry run pytest
+          pipenv --python "${{ matrix.python-version }}"
+          pipenv install --dev
+          pipenv run pytest
+#
+#      - name: Run image
+#        uses: abatilo/actions-poetry@v2.0.0
+#        with:
+#          poetry-version: ${{ matrix.poetry-version }}
+#      - name: Install Version
+#        run: |
+#          poetry install --no-dev
+#          poetry run pip install flake8 pytest black
+#          # stop the build if there are Python syntax errors or undefined names
+#          poetry run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+#          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+#          poetry run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+#
+#      - name: Test with pytest
+#        run: poetry run pytest
         
       # - name: View poetry --help
       #   run: poetry --help
