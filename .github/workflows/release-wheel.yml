@@ -7,15 +7,35 @@ on:
     tags:
       - 'v*.*.*'
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  release_job:
+    env:
+      TWINE_USERNAME: craig8
+      #TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+      TWINE_PASSWORD: ${{ secrets.TEST_PYPI_TOKEN }}
+
+    runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v2
-    - name: Build and publish to pypi
-      uses: JRubics/poetry-publish@v1.7
-      with:
-        # These are only needed when using test.pypi
-        #repository_name: testpypi
-        #repository_url: https://test.pypi.org/legacy/
-        pypi_token: ${{ secrets.PYPI_TOKEN }}
-        ignore_dev_requirements: "yes"
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8.10
+      - name: Install pipenv
+        run: pip install pipenv
+      - name: Create package
+        run: |
+          pipenv install
+          pipenv install twine
+          pipenv run python setup.py bdist_wheel sdist
+          twine upload -r testpypi --non-interactive dist/*
+
+
+#    steps:
+#    - uses: actions/checkout@v2
+#    - name: Build and publish to pypi
+#      uses: JRubics/poetry-publish@v1.7
+#      with:
+#        # These are only needed when using test.pypi
+#        #repository_name: testpypi
+#        #repository_url: https://test.pypi.org/legacy/
+#        pypi_token: ${{ secrets.PYPI_TOKEN }}
+#        ignore_dev_requirements: "yes"
