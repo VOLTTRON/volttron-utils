@@ -30,7 +30,7 @@ class ClientContext:
         "web-ssl-cert",
         "web-ssl-key",
         "web-secret-key",
-        "secure-agent-users",
+        "secure-agent-users"
     )
 
     @classmethod
@@ -150,3 +150,18 @@ class ClientContext:
         if secure_mode:
             secure_mode = secure_mode.upper() == "TRUE"
         return secure_mode
+
+    @classmethod
+    def get_server_key(cls):
+        """Returns server key"""
+        from volttron.utils.keystore import KeyStore
+        keystore_path = os.path.join(cls.get_volttron_home(), "keystore")
+        keystore = KeyStore(keystore_path)
+        return keystore.public
+
+    @classmethod
+    def get_agent_keys(cls, vip_id):
+        from volttron.utils.keystore import KeyStore
+        keystore_path = os.path.join(cls.get_volttron_home(), "agents", vip_id, "keystore.json")
+        keystore = KeyStore(keystore_path)
+        return keystore.public, keystore.secret
