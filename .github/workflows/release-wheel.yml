@@ -1,6 +1,4 @@
 ---
-# Documentation located 
-# https://github.com/marketplace/actions/publish-python-poetry-package
 name: Publish Python package
 on:
   push:
@@ -9,7 +7,8 @@ on:
 jobs:
   release_job:
     env:
-      TWINE_USERNAME: craig8
+      # These are defined in the secrets on github at the Organizational level.
+      TWINE_USERNAME: ${{ secrets.PYPI_USER_NAME }}
       TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
       # TWINE_PASSWORD: ${{ secrets.TEST_PYPI_TOKEN }}
 
@@ -28,15 +27,3 @@ jobs:
           rm dist/* -rf
           pipenv run python setup.py bdist_wheel sdist
           pipenv run twine upload --verbose -r pypi --non-interactive dist/*
-
-
-#    steps:
-#    - uses: actions/checkout@v2
-#    - name: Build and publish to pypi
-#      uses: JRubics/poetry-publish@v1.7
-#      with:
-#        # These are only needed when using test.pypi
-#        #repository_name: testpypi
-#        #repository_url: https://test.pypi.org/legacy/
-#        pypi_token: ${{ secrets.PYPI_TOKEN }}
-#        ignore_dev_requirements: "yes"

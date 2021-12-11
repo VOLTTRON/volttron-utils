@@ -1,0 +1,107 @@
+CHANGES
+=======
+
+* Standardize setup.cfg to start at python 3.8
+* Standardize github actions across core repositories
+
+v0.3.3
+------
+
+* Correct repo
+* Remove cached files just in case
+* Fixed workflows with twine
+* Fixed load\_config tests
+* vctl fixes for - install agent from wheel, dir. - start agent - stop agent - remove agent
+* removed poetry based install instructions
+* Use pbr to grab the version info from the modules
+* Python 3.7+ required Reorganized Pipfile
+* Updated setup.py removing cruf
+* First use of pipenv for creating a wheel
+
+v0.3.2
+------
+
+* bump version
+
+v0.3.1
+------
+
+* Bump version for release
+* Add missing import
+
+v0.3.0
+------
+
+* Add log
+* Reformat rename and add pyYaml
+* Added load\_config to volttron.utils
+* Only test with v1.1.6
+
+v0.2.4
+------
+
+* Adding log\_to\_file to the utils
+
+v0.2.3
+------
+
+* Fix syntax error
+* bump version
+* Added argparser
+* updated dependencies
+* Updated dependencies Added pre-commit to dev dependencies Bumped version
+* Fixed warning for missing mark
+
+v0.2.1
+------
+
+* Added better test for when wheel is installed for version
+
+v0.2.0
+------
+
+* "Fixing build errors"
+* Fix build issue
+* Added more utility methods to the module Added tests Formated using black
+* Could not get .codacy.yml to work so removed it
+* Reformatted files
+
+v0.1.3
+------
+
+* Added codacy configuration file
+* Reordered readme
+
+v0.1.2
+------
+
+* Added README, pyproject description, and release to pypi
+* Updated pyproject descriptions and classifiers
+* testing workflow
+* fixed url for test pypi
+* updated to using pypy test
+* Added github action for building release
+* Added gevent and sqlite3 based tests
+* Added keystore tests, markers and fixed references
+* Bump to version 0.1.1 of volttron-utils
+* Removed get\_home (should use ClientContext.get\_volttron\_home()) now
+* utils now has context imported
+* Fixed network re warnings
+* Added networking functions
+* Update context
+* Transfered more functionality to client context
+* Added frozendict testing
+* Added tests for network and frame serialization
+* Added on push to workflows
+* Moved context to the utils module
+* Added support for both 18.04 and 20.04 os images
+* fixed up time.py module
+* Fixed import reported by flake8
+* No dev install so we install pytest into the environment after installing pytest and black
+* Forgot to put poetry in front of environment
+* Updated to include flake8 and pytest install code
+* Added new github action to pull requests
+* Added black to dev dependency
+* Added files to the volttron.utils module for use throughout the project
+* Added tests, black precommit
+* Initial volttron-client from 4a0e393cf01227ae5917324dc83b313ab7fba4da in main volttron repo
