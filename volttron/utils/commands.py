@@ -135,14 +135,34 @@ def vip_main(agent_class, identity=None, version="0.1", **kwargs):
 
         config = os.environ.get("AGENT_CONFIG")
         identity = os.environ.get("AGENT_VIP_IDENTITY", identity)
+        publickey = kwargs.pop("publickey", None)
+        if not publickey:
+            publickey = os.environ.get("AGENT_PUBLICKEY")
+        secretkey = kwargs.pop("secretkey", None)
+        if not secretkey:
+            secretkey = os.environ.get("AGENT_SECRETKEY")
+        serverkey = kwargs.pop("serverkey", None)
+        if not serverkey:
+            serverkey = os.environ.get("VOLTTRON_SERVERKEY")
+
+        # AGENT_PUBLICKEY and AGENT_SECRETKEY must be specified
+        # for the agent to execute successfully.  aip should set these
+        # if the agent is run from the platform.  If run from the
+        # run command it should be set automatically from vctl and
+        # added to the server.
+        #
+        # TODO: Make required for all agents.  Handle it through vctl and aip.
+        if not os.environ.get("_LAUNCHED_BY_PLATFORM"):
+            if not publickey or not secretkey:
+                raise ValueError("AGENT_PUBLIC and AGENT_SECRET environmental variables must "
+                                 "be set to run without the platform.")
+
         message_bus = os.environ.get("MESSAGEBUS", "zmq")
         if identity is not None:
             if not is_valid_identity(identity):
                 _log.warning("Deprecation warining")
                 _log.warning(
-                    "All characters in {identity} are not in the valid set.".format(
-                        idenity=identity
-                    )
+                    f"All characters in {identity} are not in the valid set."
                 )
 
         address = get_address()
@@ -161,6 +181,9 @@ def vip_main(agent_class, identity=None, version="0.1", **kwargs):
                 volttron_home=volttron_home,
                 version=version,
                 message_bus=message_bus,
+                publickey=publickey,
+                secretkey=secretkey,
+                serverkey=serverkey,
                 **kwargs
             )
         else:
@@ -172,6 +195,9 @@ def vip_main(agent_class, identity=None, version="0.1", **kwargs):
                 volttron_home=volttron_home,
                 version=version,
                 message_bus=message_bus,
+                publickey=publickey,
+                secretkey=secretkey,
+                serverkey=serverkey,
                 **kwargs
             )
 

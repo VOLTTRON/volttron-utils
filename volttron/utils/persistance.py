@@ -101,7 +101,9 @@ class PersistentDict(dict):
             _log.error("Unable to sync to file {}".format(filename))
         finally:
             fileobj.close()
-        shutil.move(tempname, filename)  # atomic commit
+        if os.path.exists(tempname):
+            shutil.move(tempname, filename)  # atomic commit
+
         if mode is not None:
             os.chmod(filename, mode)
 

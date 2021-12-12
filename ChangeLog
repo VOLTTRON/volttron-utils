@@ -1,6 +1,11 @@
 CHANGES
 =======
 
+* Update command vip\_main for handling if only one env variable set added test
+* Closes #6 vip\_main can use environmental variables
+* Closes #14 error when file not produced
+* Added requirements.txt
+* Added generated files to repository
 * Standardize setup.cfg to start at python 3.8
 * Standardize github actions across core repositories
 

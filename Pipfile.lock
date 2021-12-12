@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "05363ec82c9a02d7ee27178a5bb4f4646991ed940b87e24cf3e23c4676053d66"
+            "sha256": "51e80b22352bd96acbd1aaa42ba6b97e01998b776da789832bcd14b24e12cad1"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -691,7 +691,6 @@
                 "sha256:1b5a0ea5c0e7b166b2f5895b91a08c14de8915afda4407fb5022a195224958ac",
                 "sha256:fa9e232dfa0c498bd0b8a3a73b8d8a31978304dcef0515adc859d4e096f96f4f"
             ],
-            "markers": "sys_platform == 'linux'",
             "version": "==0.7.1"
         },
         "keyring": {
@@ -707,6 +706,14 @@
                 "sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f"
             ],
             "version": "==0.6.1"
+        },
+        "mock": {
+            "hashes": [
+                "sha256:122fcb64ee37cfad5b3f48d7a7d51875d7031aaf3d8be7c42e2bee25044eee62",
+                "sha256:7d3fbbde18228f4ff2f1f119a45cdffa458b4c0dee32eb4d2bb2f82554bac7bc"
+            ],
+            "index": "pypi",
+            "version": "==4.0.3"
         },
         "nodeenv": {
             "hashes": [
