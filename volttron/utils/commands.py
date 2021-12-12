@@ -145,6 +145,18 @@ def vip_main(agent_class, identity=None, version="0.1", **kwargs):
         if not serverkey:
             serverkey = os.environ.get("VOLTTRON_SERVERKEY")
 
+        # AGENT_PUBLICKEY and AGENT_SECRETKEY must be specified
+        # for the agent to execute successfully.  aip should set these
+        # if the agent is run from the platform.  If run from the
+        # run command it should be set automatically from vctl and
+        # added to the server.
+        #
+        # TODO: Make required for all agents.  Handle it through vctl and aip.
+        if not os.environ.get("_LAUNCHED_BY_PLATFORM"):
+            if not publickey or not secretkey:
+                raise ValueError("AGENT_PUBLIC and AGENT_SECRET environmental variables must "
+                                 "be set to run without the platform.")
+
         message_bus = os.environ.get("MESSAGEBUS", "zmq")
         if identity is not None:
             if not is_valid_identity(identity):
