@@ -2,7 +2,6 @@ import logging
 import os
 import stat
 import sys
-import syslog
 import traceback
 import warnings
 
@@ -86,15 +85,13 @@ class FramesFormatter(object):
 
     __str__ = __repr__
 
-def log_to_file(file, level=logging.WARNING,
-                handler_class=logging.StreamHandler):
+
+def log_to_file(file, level=logging.WARNING, handler_class=logging.StreamHandler):
     """Direct log output to a file (or something like one)."""
     handler = handler_class(file)
     handler.setLevel(level)
     handler.setFormatter(
-        AgentFormatter(
-            "%(asctime)s %(composite_name)s %(levelname)s: %(message)s"
-        )
+        AgentFormatter("%(asctime)s %(composite_name)s %(levelname)s: %(message)s")
     )
     root = logging.getLogger()
     root.setLevel(level)
