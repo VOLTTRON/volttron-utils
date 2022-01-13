@@ -58,7 +58,7 @@ setup(
     #
     # Similar to `install_requires` above, these must be valid existing
     # projects.
-    extras_require={"dev": []},  # Optional
+    extras_require={"dev": ["pytest", "mock"]},  # Optional
     # If there are data files included in your packages that need to be
     # installed, specify them here.
     #
@@ -70,5 +70,4 @@ setup(
     # see https://python-packaging.readthedocs.io/en/latest/dependencies.html#packages-not-on-pypi
     #
     dependency_links=[],
-
 )
